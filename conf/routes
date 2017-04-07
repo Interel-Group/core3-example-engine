@@ -1,0 +1,4 @@
+# Routes
+POST    /service/users                                  controllers.Service.users
+POST    /service/clients                                controllers.Service.clients
+POST    /service/management                             controllers.Service.manage
