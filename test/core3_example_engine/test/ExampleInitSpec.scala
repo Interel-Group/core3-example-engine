@@ -62,7 +62,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
       val random = new SecureRandom()
 
       val (hashedPasswordForExampleAdmin, saltForExampleAdmin) = core3.security.hashPassword("some-test-password!", config, random)
-      val testExampleAdmin = new core.LocalUser(
+      val testExampleAdmin = core.LocalUser(
         "test-admin",
         hashedPasswordForExampleAdmin,
         saltForExampleAdmin,
@@ -73,7 +73,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
       )
 
       val (hashedPasswordForExampleUser, saltForExampleUser) = core3.security.hashPassword("some-test-password@", config, random)
-      val testExampleUser = new core.LocalUser(
+      val testExampleUser = core.LocalUser(
         "test-user",
         hashedPasswordForExampleUser,
         saltForExampleUser,
@@ -84,7 +84,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
       )
 
       val (hashedPasswordForExampleClient, saltForExampleClient) = core3.security.hashPassword("some-test-password#", config, random)
-      val testExampleClient = new core.LocalUser(
+      val testExampleClient = core.LocalUser(
         "test-client",
         hashedPasswordForExampleClient,
         saltForExampleClient,

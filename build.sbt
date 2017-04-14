@@ -35,7 +35,7 @@ lazy val core3_example_engine = (project in file("."))
       "org.jline" % "jline" % "3.2.0",
       "com.github.scopt" %% "scopt" % "3.5.0",
       "com.github.etaty" %% "rediscala" % "1.8.0",
-      "com.interelgroup" %% "core3" % "1.0.0",
+      "com.interelgroup" %% "core3" % "1.1.0",
       "net.codingwell" %% "scala-guice" % "4.0.1",
       "org.scalatest" %% "scalatest" % "3.0.0" % Test
     ),

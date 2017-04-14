@@ -33,15 +33,14 @@ class Filters @Inject()(metrics: MetricsFilter,
                         hosts: AllowedHostsFilter,
                         security: SecurityHeadersFilter,
                         cors: CORSFilter,
-                        csrf: CSRFFilter,
                         environment: Environment)
                        (implicit mat: Materializer) extends HttpFilters {
 
   override val filters: Seq[EssentialFilter] = {
     environment.mode match {
       case Mode.Dev => Seq(metrics, trace, maintenance, security, hosts, cors, compress)
-      case Mode.Test => Seq(metrics, trace, maintenance, security, hosts, cors, csrf, compress)
-      case Mode.Prod => Seq(metrics, trace, maintenance, security, hosts, cors, csrf, compress)
+      case Mode.Test => Seq(metrics, trace, maintenance, security, hosts, cors, compress)
+      case Mode.Prod => Seq(metrics, trace, maintenance, security, hosts, cors, compress)
     }
   }
 }
