@@ -139,7 +139,14 @@ class Module extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def provideComponentManager(system: ActorSystem, engine: WorkflowEngine, db: DatabaseAbstractionLayer)(implicit ec: ExecutionContext): ComponentManager = {
+  def provideBootstrap(system: ActorSystem,  db: DatabaseAbstractionLayer, workflows: Seq[WorkflowBase])(implicit ec: ExecutionContext): Bootstrap = {
+    val authConfig = StaticConfig.get.getConfig("security.authentication.clients.LocalEngineExample")
+    new Bootstrap(system.actorOf(BootstrapComponent.props(db, authConfig, workflows)))
+  }
+
+  @Provides
+  @Singleton
+  def provideComponentManager(system: ActorSystem, engine: WorkflowEngine, db: DatabaseAbstractionLayer, bs: Bootstrap)(implicit ec: ExecutionContext): ComponentManager = {
     val managerConfig = StaticConfig.get.getConfig("manager")
     implicit val timeout = Timeout(managerConfig.getInt("requestTimeout").seconds)
 
@@ -148,7 +155,8 @@ class Module extends AbstractModule with ScalaModule {
         ComponentManagerActor.props(
           Map(
             "engine" -> engine.getRef,
-            "db" -> db.getRef
+            "db" -> db.getRef,
+            "bootstrap" -> bs.getRef
           )
         )
       )
@@ -175,7 +183,8 @@ class Module extends AbstractModule with ScalaModule {
             manager.getRef,
             Seq(
               ComponentDescriptor("engine", "The system's workflow engine", core3.workflows.WorkflowEngineComponent),
-              ComponentDescriptor("db", "The system's core DB", core3.database.dals.Core)
+              ComponentDescriptor("db", "The system's core DB", core3.database.dals.Core),
+              ComponentDescriptor("bootstrap", "The system's initializer", BootstrapComponent)
             )
           )
         )
