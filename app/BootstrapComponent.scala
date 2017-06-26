@@ -19,7 +19,8 @@ import akka.actor.{ActorRef, Props}
 import com.typesafe.config.Config
 import core3.core.Component.{ActionDescriptor, ActionResult}
 import core3.core.{Component, ComponentCompanion}
-import core3.database.containers.core.{LocalUser, UserType}
+import core3.database.containers.core.LocalUser
+import core3.database.containers.core.LocalUser.UserType
 import core3.database.dals.DatabaseAbstractionLayer
 import core3.workflows.WorkflowBase
 import play.api.Logger
@@ -38,7 +39,7 @@ import scala.util.control.NonFatal
 class BootstrapComponent(
   db: DatabaseAbstractionLayer,
   authConfig: Config,
-  workflows: Seq[WorkflowBase]
+  workflows: Vector[WorkflowBase]
 )(implicit ec: ExecutionContext) extends Component {
   private val random = new SecureRandom()
   private val auditLogger = Logger("audit")
@@ -84,8 +85,8 @@ class BootstrapComponent(
                     val (hashedPassword, passwordSalt) = core3.security.hashPassword(password, authConfig, random)
                     val userType = UserType.fromString(userTypeStr)
                     val extraPermissions = userType match {
-                      case UserType.Client => Seq("c3eu:view", "c3eu:edit", "c3eu:delete")
-                      case UserType.Service => Seq("exec:asUser", "exec:asClient")
+                      case UserType.Client => Vector("c3eu:view", "c3eu:edit", "c3eu:delete")
+                      case UserType.Service => Vector("exec:asUser", "exec:asClient")
                     }
 
                     LocalUser(
@@ -125,7 +126,7 @@ class BootstrapComponent(
             (actualParams.get("username").flatten, actualParams.get("password").flatten) match {
               case (Some(username), Some(password)) =>
                 (for {
-                  user <- db.queryDatabase("LocalUser", "getByUserID", Map("userID" -> username)).map(_.containers.head.asInstanceOf[LocalUser])
+                  user <- db.queryDatabase("LocalUser", "getByUserID", Map("userID" -> username)).map(_.head.asInstanceOf[LocalUser])
                   _ <- Future {
                     val (hashedPassword, passwordSalt) = core3.security.hashPassword(password, authConfig, random)
 
@@ -159,8 +160,8 @@ object BootstrapComponent extends ComponentCompanion {
     classOf[BootstrapComponent], db, authConfig, workflows, ec
   )
 
-  override def getActionDescriptors: Seq[ActionDescriptor] = {
-    Seq(
+  override def getActionDescriptors: Vector[ActionDescriptor] = {
+    Vector(
       ActionDescriptor("stats", "Retrieves the latest component stats", arguments = None),
       ActionDescriptor(
         "create",

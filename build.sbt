@@ -8,7 +8,7 @@ lazy val appName = "core3-example-engine"
 organization := appVendor
 name := appName
 
-lazy val scalaV = "2.11.8"
+scalaVersion in ThisBuild := "2.11.11"
 
 lazy val nettyOverrides = Set(
   "io.netty" % "netty-codec-http" % "4.0.41.Final",
@@ -29,13 +29,12 @@ lazy val core3_example_engine = (project in file("."))
   .settings(
     organization := appVendor,
     name := appName,
-    scalaVersion := scalaV,
     resolvers ++= defaultResolvers,
     libraryDependencies ++= Seq(
       "org.jline" % "jline" % "3.2.0",
       "com.github.scopt" %% "scopt" % "3.5.0",
       "com.github.etaty" %% "rediscala" % "1.8.0",
-      "com.interelgroup" %% "core3" % "1.1.0",
+      "com.interelgroup" %% "core3" % "2.0.1",
       "net.codingwell" %% "scala-guice" % "4.0.1",
       "org.scalatest" %% "scalatest" % "3.0.0" % Test
     ),

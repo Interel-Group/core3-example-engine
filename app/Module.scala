@@ -22,13 +22,12 @@ import core3.core.Component.ComponentDescriptor
 import core3.core.cli.LocalConsole
 import core3.core.{ComponentManager, ComponentManagerActor}
 import core3.database._
-import core3.database.containers.{JSONContainerCompanion, JSONConverter, core}
+import core3.database.containers.{BasicContainerDefinition, JsonContainerDefinition, core}
 import core3.database.dals.json.Redis
 import core3.database.dals.{Core, DatabaseAbstractionLayer}
 import core3.http.filters.{CompressionFilter, MaintenanceModeFilter, MetricsFilter, TraceFilter}
-import core3.workflows.{definitions, StoreTransactionLogs, WorkflowBase, WorkflowEngine, WorkflowEngineComponent}
+import core3.workflows._
 import net.codingwell.scalaguice.ScalaModule
-import play.api.{Environment, Mode}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -61,17 +60,22 @@ class Module extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def provideDB(environment: Environment)(implicit system: ActorSystem, ec: ExecutionContext): DatabaseAbstractionLayer = {
-    val storeCompanions = Map[ContainerType, JSONContainerCompanion](
-      "Group" -> core.Group,
-      "TransactionLog" -> core.TransactionLog,
-      "LocalUser" -> core.LocalUser
-    )
+  def provideContainerDefinitions(): Map[ContainerType, BasicContainerDefinition with JsonContainerDefinition] = {
+    val groupDefinitions = new core.Group.BasicDefinition with core.Group.JsonDefinition
+    val transactionLogDefinitions = new core.TransactionLog.BasicDefinition with core.TransactionLog.JsonDefinition
+    val localUserDefinitions = new core.LocalUser.BasicDefinition with core.LocalUser.JsonDefinition
 
-    environment.mode match {
-      case Mode.Dev => if (!JSONConverter.isInitialized) JSONConverter.initialize(storeCompanions)
-      case _ => JSONConverter.initialize(storeCompanions)
-    }
+    Map(
+      "Group" -> groupDefinitions,
+      "TransactionLog" -> transactionLogDefinitions,
+      "LocalUser" -> localUserDefinitions
+    )
+  }
+
+  @Provides
+  @Singleton
+  def provideDB(definitions: Map[ContainerType, BasicContainerDefinition with JsonContainerDefinition])
+    (implicit system: ActorSystem, ec: ExecutionContext): DatabaseAbstractionLayer = {
 
     val storeConfig = StaticConfig.get.getConfig("database.redis")
     implicit val timeout = Timeout(StaticConfig.get.getInt("database.requestTimeout").seconds)
@@ -82,7 +86,7 @@ class Module extends AbstractModule with ScalaModule {
         storeConfig.getInt("port"),
         storeConfig.getString("secret"),
         storeConfig.getInt("connectionTimeout"),
-        storeCompanions,
+        definitions,
         storeConfig.getInt("databaseID"),
         storeConfig.getInt("scanCount")
       )
@@ -103,8 +107,8 @@ class Module extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def provideWorkflows(): Seq[WorkflowBase] = {
-    Seq(
+  def provideWorkflows(): Vector[WorkflowBase] = {
+    Vector(
       definitions.SystemCreateGroup,
       definitions.SystemCreateLocalUser,
       definitions.SystemDeleteGroup,
@@ -121,8 +125,12 @@ class Module extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def provideEngine(system: ActorSystem, workflows: Seq[WorkflowBase], db: DatabaseAbstractionLayer)
-    (implicit ec: ExecutionContext): WorkflowEngine = {
+  def provideEngine(
+    system: ActorSystem,
+    workflows: Vector[WorkflowBase],
+    db: DatabaseAbstractionLayer,
+    definitions: Map[ContainerType, BasicContainerDefinition with JsonContainerDefinition]
+  )(implicit ec: ExecutionContext): WorkflowEngine = {
     val engineConfig = StaticConfig.get.getConfig("engine")
     implicit val timeout = Timeout(engineConfig.getInt("requestTimeout").seconds)
 
@@ -131,15 +139,17 @@ class Module extends AbstractModule with ScalaModule {
         WorkflowEngineComponent.props(
           workflows,
           db,
-          StoreTransactionLogs.fromString(engineConfig.getString("storeLogs"))
-        )
+          StoreTransactionLogs.fromString(engineConfig.getString("storeLogs")),
+          TransactionLogContent.WithParamsOnly,
+          TransactionLogContent.WithDataAndParams
+        )(ec, definitions)
       )
     )
   }
 
   @Provides
   @Singleton
-  def provideBootstrap(system: ActorSystem,  db: DatabaseAbstractionLayer, workflows: Seq[WorkflowBase])(implicit ec: ExecutionContext): Bootstrap = {
+  def provideBootstrap(system: ActorSystem,  db: DatabaseAbstractionLayer, workflows: Vector[WorkflowBase])(implicit ec: ExecutionContext): Bootstrap = {
     val authConfig = StaticConfig.get.getConfig("security.authentication.clients.LocalEngineExample")
     new Bootstrap(system.actorOf(BootstrapComponent.props(db, authConfig, workflows)))
   }
@@ -181,7 +191,7 @@ class Module extends AbstractModule with ScalaModule {
             appName,
             appVersion,
             manager.getRef,
-            Seq(
+            Vector(
               ComponentDescriptor("engine", "The system's workflow engine", core3.workflows.WorkflowEngineComponent),
               ComponentDescriptor("db", "The system's core DB", core3.database.dals.Core),
               ComponentDescriptor("bootstrap", "The system's initializer", BootstrapComponent)

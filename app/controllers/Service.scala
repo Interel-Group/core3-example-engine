@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 @Singleton
-class Service @Inject()(db: DatabaseAbstractionLayer, cache: CacheApi, engine: WorkflowEngine, workflows: Seq[WorkflowBase], manager: ComponentManager)
+class Service @Inject()(db: DatabaseAbstractionLayer, cache: CacheApi, engine: WorkflowEngine, workflows: Vector[WorkflowBase], manager: ComponentManager)
   (implicit environment: Environment, ec: ExecutionContext)
   extends ServiceController(cache, StaticConfig.get.getConfig("security.authentication.clients.LocalEngineExample"), db) {
   private val auditLogger = Logger("core3-example-audit")
@@ -48,7 +48,7 @@ class Service @Inject()(db: DatabaseAbstractionLayer, cache: CacheApi, engine: W
         case Some(httpRequest) =>
           (for {
             workflowRequest <- Future {
-              WorkflowRequest(httpRequest)
+              httpRequest.as[WorkflowRequest]
             }
             workflowResult <- engine.executeWorkflow(
               workflowRequest.workflowName,
@@ -85,7 +85,7 @@ class Service @Inject()(db: DatabaseAbstractionLayer, cache: CacheApi, engine: W
         case Some(httpRequest) =>
           (for {
             workflowRequest <- Future {
-              WorkflowRequest(httpRequest)
+              httpRequest.as[WorkflowRequest]
             }
             workflowResult <- engine.executeWorkflow(
               workflowRequest.workflowName,

@@ -20,7 +20,7 @@ import java.security.SecureRandom
 
 import core3.config.StaticConfig
 import core3.database.containers.core
-import core3.database.containers.core.UserType
+import core3.database.containers.core.LocalUser.UserType
 import core3.workflows.definitions
 import org.scalatest.{Matchers, fixture}
 import play.api.libs.json.Json
@@ -36,7 +36,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
 
   "A ExampleInitSpec" should "successfully initialize an example database" in {
     _ =>
-      val adminWorkflows = Seq(
+      val adminWorkflows = Vector(
         definitions.SystemCreateGroup,
         definitions.SystemCreateLocalUser,
         definitions.SystemDeleteGroup,
@@ -50,7 +50,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
         definitions.SystemUpdateLocalUserPermissions
       )
 
-      val userWorkflows = Seq(
+      val userWorkflows = Vector(
         definitions.SystemQueryGroups,
         definitions.SystemQueryLocalUsers,
         definitions.SystemQueryTransactionLogs
@@ -66,7 +66,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
         "test-admin",
         hashedPasswordForExampleAdmin,
         saltForExampleAdmin,
-        Seq("c3eu:view", "c3eu:edit", "c3eu:delete") ++ adminWorkflows.map(_.name),
+        Vector("c3eu:view", "c3eu:edit", "c3eu:delete") ++ adminWorkflows.map(_.name),
         UserType.Client,
         Json.obj("first_name" -> "Test", "last_name" -> "Admin"),
         "test-user-0"
@@ -77,7 +77,7 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
         "test-user",
         hashedPasswordForExampleUser,
         saltForExampleUser,
-        Seq("c3eu:view") ++ userWorkflows.map(_.name),
+        Vector("c3eu:view") ++ userWorkflows.map(_.name),
         UserType.Client,
         Json.obj("first_name" -> "Test", "last_name" -> "User"),
         "test-user-0"
@@ -88,14 +88,14 @@ class ExampleInitSpec extends fixture.AsyncFlatSpec with Matchers {
         "test-client",
         hashedPasswordForExampleClient,
         saltForExampleClient,
-        Seq("exec:asUser", "exec:asClient"),
+        Vector("exec:asUser", "exec:asClient"),
         UserType.Service,
         Json.obj("first_name" -> "Test", "last_name" -> "Client"),
         "test-user-0"
       )
 
       Future.sequence(
-        Seq(
+        Vector(
           db.clearDatabaseStructure("TransactionLog"),
           db.clearDatabaseStructure("LocalUser"),
           db.clearDatabaseStructure("Group"),
