@@ -27,12 +27,11 @@ import core3.database.dals.json.Redis
 import core3.database.dals.{Core, DatabaseAbstractionLayer}
 import core3.http.filters.{CompressionFilter, MaintenanceModeFilter, MetricsFilter, TraceFilter}
 import core3.workflows._
-import net.codingwell.scalaguice.ScalaModule
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class Module extends AbstractModule with ScalaModule {
+class Module extends AbstractModule {
 
   override def configure() = {
     bind(classOf[ConsoleStart]).to(classOf[ConsoleStartImpl]).asEagerSingleton()

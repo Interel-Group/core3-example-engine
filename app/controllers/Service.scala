@@ -27,7 +27,7 @@ import core3.http.responses.GenericResult
 import core3.security.{LocalAuthUserToken, UserTokenBase}
 import core3.workflows.{WorkflowBase, WorkflowEngine, WorkflowRequest}
 import play.api.{Environment, Logger}
-import play.api.cache.CacheApi
+import play.api.cache.SyncCacheApi
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 @Singleton
-class Service @Inject()(db: DatabaseAbstractionLayer, cache: CacheApi, engine: WorkflowEngine, workflows: Vector[WorkflowBase], manager: ComponentManager)
+class Service @Inject()(db: DatabaseAbstractionLayer, cache: SyncCacheApi, engine: WorkflowEngine, workflows: Vector[WorkflowBase], manager: ComponentManager)
   (implicit environment: Environment, ec: ExecutionContext)
   extends ServiceController(cache, StaticConfig.get.getConfig("security.authentication.clients.LocalEngineExample"), db) {
   private val auditLogger = Logger("core3-example-audit")

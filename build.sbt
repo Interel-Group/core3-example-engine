@@ -8,17 +8,7 @@ lazy val appName = "core3-example-engine"
 organization := appVendor
 name := appName
 
-scalaVersion in ThisBuild := "2.11.11"
-
-lazy val nettyOverrides = Set(
-  "io.netty" % "netty-codec-http" % "4.0.41.Final",
-  "io.netty" % "netty-handler" % "4.0.41.Final",
-  "io.netty" % "netty-codec" % "4.0.41.Final",
-  "io.netty" % "netty-transport" % "4.0.41.Final",
-  "io.netty" % "netty-buffer" % "4.0.41.Final",
-  "io.netty" % "netty-common" % "4.0.41.Final",
-  "io.netty" % "netty-transport-native-epoll" % "4.0.41.Final"
-)
+scalaVersion in ThisBuild := "2.12.2"
 
 lazy val defaultResolvers = Seq(
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases",
@@ -31,14 +21,13 @@ lazy val core3_example_engine = (project in file("."))
     name := appName,
     resolvers ++= defaultResolvers,
     libraryDependencies ++= Seq(
+      guice,
       "org.jline" % "jline" % "3.2.0",
       "com.github.scopt" %% "scopt" % "3.5.0",
       "com.github.etaty" %% "rediscala" % "1.8.0",
-      "com.interelgroup" %% "core3" % "2.0.1",
-      "net.codingwell" %% "scala-guice" % "4.0.1",
-      "org.scalatest" %% "scalatest" % "3.0.0" % Test
+      "com.interelgroup" %% "core3" % "2.1.0",
+      "org.scalatest" %% "scalatest" % "3.0.3" % Test
     ),
-    dependencyOverrides ++= nettyOverrides,
     buildInfoKeys := Seq[BuildInfoKey](organization, name, version),
     buildInfoPackage := "core3_example_engine",
     buildInfoObject := "BuildInfo",
