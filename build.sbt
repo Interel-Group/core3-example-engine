@@ -8,7 +8,7 @@ lazy val appName = "core3-example-engine"
 organization := appVendor
 name := appName
 
-scalaVersion in ThisBuild := "2.12.2"
+scalaVersion in ThisBuild := "2.12.3"
 
 lazy val defaultResolvers = Seq(
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases",
@@ -25,8 +25,8 @@ lazy val core3_example_engine = (project in file("."))
       "org.jline" % "jline" % "3.2.0",
       "com.github.scopt" %% "scopt" % "3.5.0",
       "com.github.etaty" %% "rediscala" % "1.8.0",
-      "com.interelgroup" %% "core3" % "2.1.0",
-      "org.scalatest" %% "scalatest" % "3.0.3" % Test
+      "com.interelgroup" %% "core3" % "2.2.0",
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test
     ),
     buildInfoKeys := Seq[BuildInfoKey](organization, name, version),
     buildInfoPackage := "core3_example_engine",

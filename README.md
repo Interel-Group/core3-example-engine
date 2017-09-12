@@ -36,8 +36,8 @@ Required options:
 * [app/ConsoleStart](app/ConsoleStart.scala) - enables the system management console
 
 ## Built With
-* Scala 2.12.2
-* sbt 0.13.15
+* Scala 2.12.3
+* sbt 0.13.16
 * [core3](https://github.com/Interel-Group/core3) - Core framework
 * [rediscala](https://github.com/etaty/rediscala) - Redis data layer support
 
