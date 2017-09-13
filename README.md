@@ -8,6 +8,8 @@ Example Scala Play 2.6 app showcasing a way to build a backend service with [cor
 * Add ```static.conf``` (see the [reference config](conf/static_ref.conf) for more info)
 * ```sbt run -Dhttps.port=<some local port> -Dhttp.port=disabled -Dc3ee.console=enabled```
 
+> For a combined engine/UI implementation, see [core3-example-combined](https://github.com/Interel-Group/core3-example-combined).
+
 ## Supported data sources
 * [Redis](https://redis.io/) (tested on 3.2.5, 3.2.8)
 
